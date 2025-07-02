@@ -48,14 +48,13 @@
         }
 
         /* Styly pro přetažený prvek uvnitř zóny */
-        /* Překryje původní text dropzóny */
-        .dropzone .dropped-draggable-wrapper {
-            position: absolute; /* Vytvoří obal pro draggable, když je v dropzone */
+        .dropzone .draggable.dropped-item {
+            position: absolute; /* Vložený draggable se absolutně pozicuje */
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
+            width: 100%; /* Vyplní celou šířku dropzone */
+            height: 100%; /* Vyplní celou výšku dropzone */
+            display: flex; /* Zajistí centraci obsahu */
             align-items: center;
             justify-content: center;
             z-index: 10; /* Zajistí, že je nad původním textem */
@@ -70,11 +69,11 @@
             opacity: 1;
         }
 
-
         /* Původní text dropzóny */
         .dropzone .original-text-content {
             z-index: 5; /* Pod přetaženým prvkem */
             display: block; /* Ve výchozím stavu viditelný */
+            text-align: center;
         }
 
         /* Důležité: Styly pro MathJax rovnice */
@@ -173,4 +172,133 @@
             border-color: #dc3545; /* Červený okraj */
         }
     </style>
-    <script
+    <script>
+        // Konfigurace MathJax
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            options: {
+                processHtmlClass: 'math-content'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 h-full">
+    <div class="bg-white rounded-xl shadow-2xl main-quiz-container">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Zahradník Bedřich osází záhon za 6 dní, Tonda za 10 dní, Kamila za 8 dní. Přesuňte věty na jejich správné matematické vyjádření.</h1>
+
+        <!-- Původní (skryté) prvky, které MathJax zpracuje a my je budeme klonovat -->
+        <div id="original-elements-container" class="hidden">
+            <div id="draggable-orange"
+                 class="draggable bg-orange-500 text-white p-1 rounded-lg shadow-md font-semibold"
+                 data-correct-target="dropzone-orange">
+                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>
+            </div>
+            <div id="dropzone-orange"
+                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
+                 data-accepts="draggable-orange">
+                <span class="mb-1 text-center original-text-content">Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+            </div>
+
+            <div id="draggable-red"
+                 class="draggable bg-red-500 text-white p-1 rounded-lg shadow-md font-semibold"
+                 data-correct-target="dropzone-red">
+                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>
+            </div>
+            <div id="dropzone-red"
+                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
+                 data-accepts="draggable-red">
+                <span class="mb-1 text-center original-text-content">Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+            </div>
+
+            <div id="draggable-yellow"
+                 class="draggable bg-yellow-500 text-white p-1 rounded-lg shadow-md font-semibold"
+                 data-correct-target="dropzone-yellow">
+                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=\frac78 $$</p>
+            </div>
+            <div id="dropzone-yellow"
+                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
+                 data-accepts="draggable-yellow">
+                <span class="mb-1 text-center original-text-content">Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+            </div>
+
+            <div id="draggable-green"
+                 class="draggable bg-green-500 text-white p-1 rounded-lg shadow-md font-semibold"
+                 data-correct-target="dropzone-green">
+                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{x}+\frac18+\frac{1}{10}\right)=1 $$</p>
+            </div>
+            <div id="dropzone-green"
+                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
+                 data-accepts="draggable-green">
+                <span class="mb-1 text-center original-text-content">Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.</span>
+            </div>
+
+            <div id="draggable-blue"
+                 class="draggable bg-blue-500 text-white p-1 rounded-lg shadow-md font-semibold"
+                 data-correct-target="dropzone-blue">
+                <p class="math-content">$$ {\frac{1}{6}} + {\frac{1}{10}} + {\frac{1}{8}} = {\frac{x}{1}} $$</p>
+            </div>
+            <div id="dropzone-blue"
+                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
+                 data-accepts="draggable-blue">
+                <span class="mb-1 text-center original-text-content">Jak dlouho by trvalo osázení záhonu, kdyby všichni pracovali společně?</span>
+            </div>
+
+            <div id="draggable-purple"
+                 class="draggable bg-purple-500 text-white p-1 rounded-lg shadow-md font-semibold"
+                 data-correct-target="dropzone-purple">
+                <p class="math-content">$$ {\frac{x}{6}} + {\frac{x}{10}} + {\frac{x}{8}} = 1 $$</p>
+            </div>
+            <div id="dropzone-purple"
+                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
+                 data-accepts="draggable-purple">
+                <span class="mb-1 text-center original-text-content">Všichni osazovali záhon společně po dobu X dní. Jak dlouho trvala práce?</span>
+            </div>
+        </div>
+
+        <div id="quiz-columns-wrapper" class="quiz-columns-wrapper">
+            <div id="draggable-column" class="draggable-column">
+                <!-- Zde budou dynamicky vloženy draggables -->
+            </div>
+            <div id="dropzone-column" class="dropzone-column">
+                <!-- Zde budou dynamicky vloženy dropzones -->
+            </div>
+        </div>
+
+        <div id="message-box" class="mt-4 p-2 rounded-lg hidden message-box w-full max-w-md">
+        </div>
+
+        <button id="check-button" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-colors">
+            Zkontrolovat
+        </button>
+
+        <button id="reset-button" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow-md hover:bg-gray-300 transition-colors hidden reset-button">
+            Resetovat kvíz
+        </button>
+    </div>
+
+    <script>
+        // Konfigurace MathJax (zůstává v hlavičce, ale s odstraněnou append volbou)
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            options: {
+                processHtmlClass: 'math-content'
+            }
+        };
+
+        // HLAVNÍ ZMĚNA: Spuštění logiky JS až po připravení MathJaxu
+        // To zajistí, že MathJax.startup.document bude definovaný
+        MathJax.startup.ready.then(() => {
+            console.log("MathJax is ready. DOMContentLoaded listener will be added.");
+
+            document.addEventListener('DOMContentLoaded
