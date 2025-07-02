@@ -1,313 +1,154 @@
 <!DOCTYPE html>
-<html lang="cs" class="h-full">
+<html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drag and Drop Kvíz</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Základní styly pro drag-and-drop */
-        .draggable {
-            cursor: grab;
-            transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
-            touch-action: none; /* Zabraňuje výchozímu chování prohlížeče při dotyku */
-            width: 24rem; /* Mírně zmenšena šířka draggable boxů */
-            min-height: 4rem; /* Mírně zmenšena minimální výška draggable boxů */
-            padding: 0.5rem; /* Zmenšen padding */
-            display: flex; /* Zajistí, že obsah (MathJax) je zarovnán */
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-sizing: border-box; /* Zahrnuje padding a border do šířky/výšky */
-            z-index: 20; /* Vyšší z-index pro draggable, když se přetahuje */
-        }
-
-        .draggable:active {
-            cursor: grabbing;
-        }
-
-        .dropzone {
-            border: 2px dashed #cbd5e0; /* border-gray-300 */
-            background-color: #f8fafc; /* bg-gray-50 */
-            transition: background-color 0.3s ease;
-            min-height: 5rem; /* Mírně zmenšena minimální výška dropzóny */
-            width: 28rem; /* Mírně zmenšena šířka dropzóny */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0.5rem; /* Zmenšen padding */
-            box-sizing: border-box; /* Zahrnuje padding a border do šířky/výšky */
-            position: relative; /* Pro absolutní pozicování dropped-item */
-            overflow: hidden; /* Skryje případný přetékající obsah */
-        }
-
-        .dropzone.hovered {
-            background-color: #e2e8f0; /* bg-gray-200 */
-        }
-
-        /* Styly pro přetažený prvek uvnitř zóny */
-        .dropzone .draggable.dropped-item {
-            position: absolute; /* Vložený draggable se absolutně pozicuje */
-            top: 0;
-            left: 0;
-            width: 100%; /* Vyplní celou šířku dropzone */
-            height: 100%; /* Vyplní celou výšku dropzone */
-            display: flex; /* Zajistí centraci obsahu */
-            align-items: center;
-            justify-content: center;
-            z-index: 10; /* Zajistí, že je nad původním textem */
-        }
-
-        /* Skrývá MathJax renderer při přetahování */
-        .draggable.opacity-40 .mjx-chtml {
-            opacity: 0;
-        }
-        /* Zobrazuje MathJax renderer po dropu */
-        .draggable .mjx-chtml {
-            opacity: 1;
-        }
-
-        /* Původní text dropzóny */
-        .dropzone .original-text-content {
-            z-index: 5; /* Pod přetaženým prvkem */
-            display: block; /* Ve výchozím stavu viditelný */
-            text-align: center;
-        }
-
-        /* Důležité: Styly pro MathJax rovnice */
-        .mjx-chtml {
-            display: inline-block;
-            vertical-align: middle;
-            text-align: center;
-            font-size: 1.25rem !important; /* Dále zmenšena velikost písma rovnic */
-        }
-
-        /* Optimalizace pro menší obrazovky a Genially */
-        body {
-            padding: 0;
-            margin: 0;
-            height: 100%;
-            overflow: hidden; /* Zabrání scrollování celého body */
-        }
-
-        /* Nové styly pro hlavní kontejner pro Genially */
-        .main-quiz-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between; /* Rozloží prvky na výšku */
-            padding: 0.5rem; /* Zmenšen padding hlavního kontejneru */
-            box-sizing: border-box;
-        }
-
-        /* Kontejnery pro draggable a dropzone prvky */
-        .quiz-columns-wrapper {
-            display: flex;
-            justify-content: center;
-            gap: 2rem; /* Mezera mezi sloupci */
-            width: 100%;
-            padding: 0.5rem;
-            box-sizing: border-box;
-            flex-wrap: wrap; /* Pro responzivitu, aby se sloupce zalamovaly */
-        }
-
-        .draggable-column, .dropzone-column {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem; /* Mezera mezi prvky ve sloupci */
-        }
-
-        /* Zvětšení textu nadpisů a tlačítek */
-        h1 {
-            font-size: 2.2rem; /* Mírně zmenšeno pro nadpis */
-            margin-bottom: 0.4rem; /* Zmenšeno pro odstup */
-        }
-
-        .message-box {
-            font-size: 1.1rem; /* Mírně zmenšeno pro zprávy */
-            padding: 0.6rem 1rem; /* Zmenšeno pro lepší vzhled */
-            margin-top: 0.4rem; /* Zmenšeno pro odstup */
-        }
-
-        .reset-button {
-            padding: 0.6rem 1.2rem; /* Zmenšeno pro tlačítko */
-            font-size: 1.1rem; /* Mírně zmenšeno pro tlačítko */
-            margin-top: 0.4rem; /* Zmenšeno pro odstup */
-        }
-
-        /* Písmo uvnitř dropzón */
-        .dropzone span {
-            font-size: 1.1rem; /* Dále zmenšeno pro text v dropzónách */
-            line-height: 1.3;
-        }
-
-        /* Písmo uvnitř draggable boxů (pro MathJax rovnice) */
-        .draggable p {
-            font-size: 1.2rem; /* Dále zmenšeno pro rovnice */
-            line-height: 1.3;
-        }
-
-        /* Styly pro feedback */
-        .message-box.correct {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #155724;
-        }
-        .message-box.incorrect {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #721c24;
-        }
-        .dropzone.correct-answer {
-            background-color: #e6ffe6; /* Světle zelené pozadí */
-            border-color: #28a745; /* Zelený okraj */
-        }
-        .dropzone.incorrect-answer {
-            background-color: #ffe6e6; /* Světle červené pozadí */
-            border-color: #dc3545; /* Červený okraj */
-        }
-    </style>
-    <script>
-        // Konfigurace MathJax
-        MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']]
-            },
-            svg: {
-                fontCache: 'global'
-            },
-            options: {
-                // Tato volba je neplatná a způsobuje varování, odstranil jsem ji
-                // append: true,
-                processHtmlClass: 'math-content'
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Přiřazování rovnic</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-blue-100 to-purple-100 h-full">
-    <div class="bg-white rounded-xl shadow-2xl main-quiz-container">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Zahradník Bedřich osází záhon za 6 dní, Tonda za 10 dní, Kamila za 8 dní. Přesuňte věty na jejich správné matematické vyjádření.</h1>
+<body class="bg-gray-100 p-6">
+  <h1 class="text-2xl font-bold text-center mb-6">Přiřaď rovnici ke správnému slovnímu popisu</h1>
 
-        <div id="original-elements-container" class="hidden">
-            <div id="draggable-orange"
-                 class="draggable bg-orange-500 text-white p-1 rounded-lg shadow-md font-semibold"
-                 data-correct-target="dropzone-orange">
-                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>
-            </div>
-            <div id="dropzone-orange"
-                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
-                 data-accepts="draggable-orange">
-                <span class="mb-1 text-center original-text-content">Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
-            </div>
-
-            <div id="draggable-red"
-                 class="draggable bg-red-500 text-white p-1 rounded-lg shadow-md font-semibold"
-                 data-correct-target="dropzone-red">
-                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>
-            </div>
-            <div id="dropzone-red"
-                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
-                 data-accepts="draggable-red">
-                <span class="mb-1 text-center original-text-content">Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
-            </div>
-
-            <div id="draggable-yellow"
-                 class="draggable bg-yellow-500 text-white p-1 rounded-lg shadow-md font-semibold"
-                 data-correct-target="dropzone-yellow">
-                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=\frac78 $$</p>
-            </div>
-            <div id="dropzone-yellow"
-                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
-                 data-accepts="draggable-yellow">
-                <span class="mb-1 text-center original-text-content">Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
-            </div>
-
-            <div id="draggable-green"
-                 class="draggable bg-green-500 text-white p-1 rounded-lg shadow-md font-semibold"
-                 data-correct-target="dropzone-green">
-                <p class="math-content">$$ 2\cdot\left({{\frac16}}+\frac{1}{x}+\frac18+\frac{1}{10}\right)=1 $$</p>
-            </div>
-            <div id="dropzone-green"
-                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
-                 data-accepts="draggable-green">
-                <span class="mb-1 text-center original-text-content">Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.</span>
-            </div>
-
-            <div id="draggable-blue"
-                 class="draggable bg-blue-500 text-white p-1 rounded-lg shadow-md font-semibold"
-                 data-correct-target="dropzone-blue">
-                <p class="math-content">$$ {\frac{1}{6}} + {\frac{1}{10}} + {\frac{1}{8}} = {\frac{x}{1}} $$</p>
-            </div>
-            <div id="dropzone-blue"
-                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
-                 data-accepts="draggable-blue">
-                <span class="mb-1 text-center original-text-content">Jak dlouho by trvalo osázení záhonu, kdyby všichni pracovali společně?</span>
-            </div>
-
-            <div id="draggable-purple"
-                 class="draggable bg-purple-500 text-white p-1 rounded-lg shadow-md font-semibold"
-                 data-correct-target="dropzone-purple">
-                <p class="math-content">$$ {\frac{x}{6}} + {\frac{x}{10}} + {\frac{x}{8}} = 1 $$</p>
-            </div>
-            <div id="dropzone-purple"
-                 class="dropzone p-2 rounded-lg flex flex-col items-center justify-content-center text-gray-500 font-medium"
-                 data-accepts="draggable-purple">
-                <span class="mb-1 text-center original-text-content">Všichni osazovali záhon společně po dobu X dní. Jak dlouho trvala práce?</span>
-            </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+    <!-- Popisy -->
+    <div>
+      <h2 class="text-lg font-semibold mb-2">Slovní popisy</h2>
+      <div class="space-y-4">
+        <div class="dropzone p-4 bg-white rounded shadow" id="zone1">
+          1. Rovnice s jednou neznámou
+          <div class="feedback text-sm mt-2 font-medium"></div>
         </div>
-
-        <div id="quiz-columns-wrapper" class="quiz-columns-wrapper">
-            <div id="draggable-column" class="draggable-column">
-                </div>
-            <div id="dropzone-column" class="dropzone-column">
-                </div>
+        <div class="dropzone p-4 bg-white rounded shadow" id="zone2">
+          2. Rovnice s neznámou na obou stranách
+          <div class="feedback text-sm mt-2 font-medium"></div>
         </div>
-
-        <div id="message-box" class="mt-4 p-2 rounded-lg hidden message-box w-full max-w-md">
+        <div class="dropzone p-4 bg-white rounded shadow" id="zone3">
+          3. Rovnice se závorkami
+          <div class="feedback text-sm mt-2 font-medium"></div>
         </div>
-
-        <button id="check-button" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-colors">
-            Zkontrolovat
-        </button>
-
-        <button id="reset-button" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow-md hover:bg-gray-300 transition-colors hidden reset-button">
-            Resetovat kvíz
-        </button>
+        <div class="dropzone p-4 bg-white rounded shadow" id="zone4">
+          4. Rovnice s parametrem
+          <div class="feedback text-sm mt-2 font-medium"></div>
+        </div>
+        <div class="dropzone p-4 bg-white rounded shadow" id="zone5">
+          5. Rovnice s desetinnými čísly
+          <div class="feedback text-sm mt-2 font-medium"></div>
+        </div>
+        <div class="dropzone p-4 bg-white rounded shadow" id="zone6">
+          6. Rovnice s nulou na jedné straně
+          <div class="feedback text-sm mt-2 font-medium"></div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        // Funkce pro zamíchání pole (Fisher-Yates algoritmus)
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
+    <!-- Rovnice -->
+    <div>
+      <h2 class="text-lg font-semibold mb-2">Rovnice (přetáhni)</h2>
+      <div class="grid grid-cols-1 gap-4">
+        <div id="item1" class="draggable bg-blue-400 text-white p-3 rounded shadow cursor-move text-center" draggable="true" data-correct="zone1">
+          x + 5 = 10
+        </div>
+        <div id="item2" class="draggable bg-green-400 text-white p-3 rounded shadow cursor-move text-center" draggable="true" data-correct="zone2">
+          2x + 1 = x + 4
+        </div>
+        <div id="item3" class="draggable bg-purple-400 text-white p-3 rounded shadow cursor-move text-center" draggable="true" data-correct="zone3">
+          3(x - 2) = 12
+        </div>
+        <div id="item4" class="draggable bg-red-400 text-white p-3 rounded shadow cursor-move text-center" draggable="true" data-correct="zone4">
+          a·x = 8
+        </div>
+        <div id="item5" class="draggable bg-yellow-400 text-white p-3 rounded shadow cursor-move text-center" draggable="true" data-correct="zone5">
+          1.5x + 0.2 = 3.8
+        </div>
+        <div id="item6" class="draggable bg-pink-400 text-white p-3 rounded shadow cursor-move text-center" draggable="true" data-correct="zone6">
+          5x - 10 = 0
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-center mt-8">
+    <button id="checkBtn" class="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700 transition">
+      Zkontrolovat
+    </button>
+  </div>
+
+  <div id="finalFeedback" class="text-center text-lg font-semibold mt-4"></div>
+
+  <script>
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+    let draggedId = null;
+
+    // Drag & drop funkce
+    draggables.forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        draggedId = e.target.id;
+        e.dataTransfer.setData('text/plain', draggedId);
+        item.classList.add('opacity-50');
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('opacity-50');
+      });
+    });
+
+    dropzones.forEach(zone => {
+      zone.addEventListener('dragover', e => {
+        e.preventDefault();
+        zone.classList.add('bg-yellow-100');
+      });
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('bg-yellow-100');
+      });
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('bg-yellow-100');
+
+        const droppedId = e.dataTransfer.getData('text/plain');
+        const droppedEl = document.getElementById(droppedId);
+
+        // odstranění staré rovnice, pokud existuje
+        const existing = zone.querySelector('.draggable');
+        if (existing) {
+          document.querySelector('body').appendChild(existing); // vrátit do těla
         }
 
-        // Funkce pro inicializaci/reset kvízu
-        function initializeQuiz() {
-            console.log("initializeQuiz started.");
-            const originalElementsContainer = document.getElementById('original-elements-container');
-            const draggableColumn = document.getElementById('draggable-column');
-            const dropzoneColumn = document.getElementById('dropzone-column');
-            const messageBox = document.getElementById('message-box');
-            const checkButton = document.getElementById('check-button');
-            const resetButton = document.getElementById('reset-button');
+        zone.appendChild(droppedEl);
+      });
+    });
 
-            // Vyčistit předchozí stav
-            draggableColumn.innerHTML = '';
-            dropzoneColumn.innerHTML = '';
-            messageBox.classList.add('hidden');
-            messageBox.textContent = '';
-            messageBox.classList.remove('correct', 'incorrect');
-            resetButton.classList.add('hidden');
-            checkButton.classList.remove('hidden');
+    // Kontrola správnosti
+    document.getElementById('checkBtn').addEventListener('click', () => {
+      let allCorrect = true;
 
-            // Načíst a klonovat původní draggable a dropzone prvky
-            const originalDr
+      dropzones.forEach(zone => {
+        const feedback = zone.querySelector('.feedback');
+        const dropped = zone.querySelector('.draggable');
+
+        if (!dropped) {
+          feedback.textContent = '❌ Chybí rovnice';
+          feedback.className = 'feedback text-red-600 font-medium';
+          allCorrect = false;
+        } else if (dropped.dataset.correct === zone.id) {
+          feedback.textContent = '✅ Správně!';
+          feedback.className = 'feedback text-green-600 font-medium';
+        } else {
+          feedback.textContent = '❌ Špatně';
+          feedback.className = 'feedback text-red-600 font-medium';
+          allCorrect = false;
+        }
+      });
+
+      const finalFeedback = document.getElementById('finalFeedback');
+      if (allCorrect) {
+        finalFeedback.textContent = '🎉 Všechny odpovědi jsou správně! Skvělá práce!';
+        finalFeedback.className = 'text-green-700 font-bold mt-4 text-xl';
+      } else {
+        finalFeedback.textContent = '🔄 Ještě to není správně. Zkus to znovu.';
+        finalFeedback.className = 'text-red-600 font-semibold mt-4 text-lg';
+      }
+    });
+  </script>
+</body>
+</html>
+
