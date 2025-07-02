@@ -18,6 +18,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            box-sizing: border-box; /* Zahrnuje padding a border do šířky/výšky */
         }
 
         .draggable:active {
@@ -36,6 +37,7 @@
             justify-content: center;
             text-align: center;
             padding: 0.5rem; /* Zmenšen padding */
+            box-sizing: border-box; /* Zahrnuje padding a border do šířky/výšky */
         }
 
         .dropzone.hovered {
@@ -93,8 +95,12 @@
         }
 
         /* Zmenšení obecných mezer */
-        .flex.flex-col.gap-2 { /* Cílíme na kontejner s páry */
+        #quiz-pairs-container { /* Cílíme na kontejner s páry */
             gap: 0.5rem; /* Zmenšena mezera mezi páry */
+            display: flex; /* Abychom je mohli efektivně uspořádat */
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
 
         /* Zvětšení textu nadpisů a tlačítek */
@@ -164,8 +170,115 @@
     <div class="bg-white rounded-xl shadow-2xl main-quiz-container">
         <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Zahradník Bedřich osází záhon za 6 dní, Tonda za 10 dní, Kamila za 8 dní. Přesuňte věty na jejich správné matematické vyjádření.</h1>
 
-        <div id="quiz-container" class="flex flex-col gap-2 w-full items-center">
+        <div id="quiz-pairs-container" class="flex flex-col gap-2">
+            <div class="quiz-pair">
+                <div id="item-orange"
+                     class="draggable bg-orange-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-orange-basket"
+                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>'>
+                    <p class="text-center">
+                        $$ 2\cdot\left({{\frac16}}+\frac{1}{10}\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$
+                    </p>
+                </div>
+                <div id="target-orange-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-orange"
+                     data-original-html='<span class="mb-1 text-center">Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>'>
+                    <span class="mb-1 text-center">Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+                </div>
             </div>
+
+            <div class="quiz-pair">
+                <div id="item-red"
+                     class="draggable bg-red-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-red-basket"
+                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>'>
+                    <p class="text-center">
+                        $$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$
+                    </p>
+                </div>
+                <div id="target-red-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-red"
+                     data-original-html='<span class="mb-1 text-center">Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>'>
+                    <span class="mb-1 text-center">Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-yellow"
+                     class="draggable bg-yellow-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-yellow-basket"
+                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=\frac78 $$</p>'>
+                    <p class="text-center">
+                        $$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=\frac78 $$
+                    </p>
+                </div>
+                <div id="target-yellow-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-yellow"
+                     data-original-html='<span class="mb-1 text-center">Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>'>
+                    <span class="mb-1 text-center">Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-green"
+                     class="draggable bg-green-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-green-basket"
+                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{x}+\frac18+\frac{1}{10}\right)=1 $$</p>'>
+                    <p class="text-center">
+                        $$ 2\cdot\left({{\frac16}}+\frac{1}{x}+\frac18+\frac{1}{10}\right)=1 $$
+                    </p>
+                </div>
+                <div id="target-green-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-green"
+                     data-original-html='<span class="mb-1 text-center">Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.</span>'>
+                    <span class="mb-1 text-center">Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-blue"
+                     class="draggable bg-blue-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-blue-basket"
+                     data-original-html='<p class="text-center">$$ {\frac{1}{6}} + {\frac{1}{10}} + {\frac{1}{8}} = {\frac{x}{1}} $$</p>'>
+                    <p class="text-center">
+                        $$ {\frac{1}{6}} + {\frac{1}{10}} + {\frac{1}{8}} = {\frac{x}{1}} $$
+                    </p>
+                </div>
+                <div id="target-blue-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-blue"
+                     data-original-html='<span class="mb-1 text-center">Jak dlouho by trvalo osázení záhonu, kdyby všichni pracovali společně?</span>'>
+                    <span class="mb-1 text-center">Jak dlouho by trvalo osázení záhonu, kdyby všichni pracovali společně?</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-purple"
+                     class="draggable bg-purple-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-purple-basket"
+                     data-original-html='<p class="text-center">$$ {\frac{x}{6}} + {\frac{x}{10}} + {\frac{x}{8}} = 1 $$</p>'>
+                    <p class="text-center">
+                        $$ {\frac{x}{6}} + {\frac{x}{10}} + {\frac{x}{8}} = 1 $$
+                    </p>
+                </div>
+                <div id="target-purple-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-purple"
+                     data-original-html='<span class="mb-1 text-center">Všichni osazovali záhon společně po dobu X dní. Jak dlouho trvala práce?</span>'>
+                    <span class="mb-1 text-center">Všichni osazovali záhon společně po dobu X dní. Jak dlouho trvala práce?</span>
+                </div>
+            </div>
+        </div>
 
         <div id="message-box" class="mt-4 p-2 rounded-lg hidden message-box w-full max-w-md">
         </div>
@@ -174,111 +287,4 @@
             Zkontrolovat
         </button>
 
-        <button id="reset-button" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow-md hover:bg-gray-300 transition-colors hidden reset-button">
-            Resetovat kvíz
-        </button>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const quizContainer = document.getElementById('quiz-container');
-            const messageBox = document.getElementById('message-box');
-            const checkButton = document.getElementById('check-button');
-            const resetButton = document.getElementById('reset-button');
-
-            // Definice všech dvojic (rovnice a odpovídající text)
-            // Ujistěte se, že ID jsou unikátní a odpovídají data-correct-target
-            const quizItems = [
-                {
-                    id: 'item-orange',
-                    equation: '$$ 2\\cdot\\left({{\\frac16}}+\\frac{1}{10}\\right)+x\\cdot\\left({{\\frac18}}+\\frac{1}{10}\\right)=1 $$',
-                    text: 'Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.',
-                    color: 'bg-orange-500'
-                },
-                {
-                    id: 'item-red',
-                    equation: '$$ 2\\cdot\\left({{\\frac16}}+\\frac{1}{10}+\\frac18\\right)+x\\cdot\\left({{\\frac18}}+\\frac{1}{10}\\right)=1 $$',
-                    text: 'Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.',
-                    color: 'bg-red-500'
-                },
-                {
-                    id: 'item-yellow',
-                    equation: '$$ 2\\cdot\\left({{\\frac16}}+\\frac{1}{10}+\\frac18\\right)+x\\cdot\\left({{\\frac18}}+\\frac{1}{10}\\right)=\\frac78 $$',
-                    text: 'Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.',
-                    color: 'bg-yellow-500'
-                },
-                {
-                    id: 'item-green',
-                    equation: '$$ 2\\cdot\\left({{\\frac16}}+\\frac{1}{x}+\\frac18+\\frac{1}{10}\\right)=1 $$',
-                    text: 'Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.',
-                    color: 'bg-green-500'
-                },
-                // Zde můžete přidat další dvojice, pokud chcete
-                // Příklad dalších dvou prázdných, které byly v HTML
-                {
-                    id: 'item-blue',
-                    equation: '$$ {\\frac{1}{6}} + {\\frac{1}{10}} + {\\frac{1}{8}} = {\\frac{x}{1}} $$',
-                    text: 'Jak dlouho by trvalo osázení záhonu, kdyby všichni pracovali společně?',
-                    color: 'bg-blue-500'
-                },
-                {
-                    id: 'item-purple',
-                    equation: '$$ {\\frac{x}{6}} + {\\frac{x}{10}} + {\\frac{x}{8}} = 1 $$',
-                    text: 'Všichni osazovali záhon společně po dobu X dní. Jak dlouho trvala práce?',
-                    color: 'bg-purple-500'
-                }
-            ];
-
-            let draggedItem = null; // Proměnná pro uchování refernce na přetahovaný prvek
-
-            // Funkce pro zamíchání pole (Fisher-Yates algoritmus)
-            function shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-            }
-
-            // Funkce pro inicializaci/reset kvízu
-            function initializeQuiz() {
-                quizContainer.innerHTML = ''; // Vyčistíme kontejner
-                messageBox.classList.add('hidden');
-                messageBox.textContent = '';
-                messageBox.classList.remove('correct', 'incorrect');
-                resetButton.classList.add('hidden');
-                checkButton.classList.remove('hidden');
-
-                const shuffledEquations = [...quizItems];
-                const shuffledTexts = [...quizItems];
-                shuffleArray(shuffledEquations); // Zamícháme rovnice
-                shuffleArray(shuffledTexts);   // Zamícháme texty
-
-                // Vytvoříme HTML strukturu pro každý pár
-                for (let i = 0; i < quizItems.length; i++) {
-                    const pairDiv = document.createElement('div');
-                    pairDiv.classList.add('quiz-pair');
-
-                    // Vytvoření draggable elementu (rovnice)
-                    const draggableDiv = document.createElement('div');
-                    draggableDiv.id = shuffledEquations[i].id;
-                    draggableDiv.classList.add('draggable', shuffledEquations[i].color, 'text-white', 'p-1', 'rounded-lg', 'shadow-md', 'font-semibold', 'transform', 'hover:scale-105');
-                    draggableDiv.setAttribute('draggable', 'true');
-                    draggableDiv.dataset.correctTarget = `target-${shuffledEquations[i].id}`; // Cílový ID
-                    draggableDiv.innerHTML = `<p class="text-center">${shuffledEquations[i].equation}</p>`;
-                    draggableDiv.dataset.originalParent = 'draggable-list'; // Uchováme původní rodiče
-                    draggableDiv.dataset.originalColorClass = shuffledEquations[i].color; // Uchováme původní barvu
-
-                    // Vytvoření dropzone elementu (text)
-                    const dropzoneDiv = document.createElement('div');
-                    dropzoneDiv.id = `target-${shuffledTexts[i].id}`; // Dynamické ID pro dropzone
-                    dropzoneDiv.classList.add('dropzone', 'p-2', 'rounded-lg', 'flex', 'flex-col', 'items-center', 'justify-center', 'text-gray-500', 'font-medium');
-                    dropzoneDiv.innerHTML = `<span class="mb-1 text-center">${shuffledTexts[i].text}</span>`;
-                    dropzoneDiv.dataset.correctSource = shuffledTexts[i].id; // Správné ID draggable prvku pro tuto dropzone
-
-                    // Přidáme je do páru
-                    pairDiv.appendChild(draggableDiv);
-                    pairDiv.appendChild(dropzoneDiv);
-                    quizContainer.appendChild(pairDiv);
-                }
-
-                // Po
+        <button id="reset-button" class="mt-4 px-4 py-2 bg-
