@@ -19,6 +19,7 @@
             justify-content: center;
             text-align: center;
             box-sizing: border-box; /* Zahrnuje padding a border do šířky/výšky */
+            z-index: 20; /* Vyšší z-index pro draggable, když se přetahuje */
         }
 
         .draggable:active {
@@ -38,6 +39,8 @@
             text-align: center;
             padding: 0.5rem; /* Zmenšen padding */
             box-sizing: border-box; /* Zahrnuje padding a border do šířky/výšky */
+            position: relative; /* Pro absolutní pozicování dropped-item */
+            overflow: hidden; /* Skryje případný přetékající obsah */
         }
 
         .dropzone.hovered {
@@ -45,15 +48,33 @@
         }
 
         /* Styly pro přetažený prvek uvnitř zóny */
-        .dropped-item {
-            cursor: default !important;
-            opacity: 1 !important;
-            transform: none !important;
-            width: 100%; /* Vyplní celou šířku dropzone */
-            height: 100%; /* Vyplní celou výšku dropzone */
-            display: flex; /* Centrujeme obsah uvnitř */
+        /* Překryje původní text dropzóny */
+        .dropzone .dropped-draggable-wrapper {
+            position: absolute; /* Vytvoří obal pro draggable, když je v dropzone */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 10; /* Zajistí, že je nad původním textem */
+        }
+
+        /* Skrývá MathJax renderer při přetahování */
+        .draggable.opacity-40 .mjx-chtml {
+            opacity: 0;
+        }
+        /* Zobrazuje MathJax renderer po dropu */
+        .draggable .mjx-chtml {
+            opacity: 1;
+        }
+
+
+        /* Původní text dropzóny */
+        .dropzone .original-text-content {
+            z-index: 5; /* Pod přetaženým prvkem */
+            display: block; /* Ve výchozím stavu viditelný */
         }
 
         /* Důležité: Styly pro MathJax rovnice */
@@ -85,22 +106,21 @@
         }
 
         /* Kontejnery pro draggable a dropzone prvky */
-        .quiz-pair {
+        .quiz-columns-wrapper {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 1rem; /* Mírně zmenšena mezera mezi draggable a dropzone v páru */
-            margin-bottom: 0.3rem; /* Zmenšena mezera mezi jednotlivými páry */
+            gap: 2rem; /* Mezera mezi sloupci */
             width: 100%;
+            padding: 0.5rem;
+            box-sizing: border-box;
+            flex-wrap: wrap; /* Pro responzivitu, aby se sloupce zalamovaly */
         }
 
-        /* Zmenšení obecných mezer */
-        #quiz-pairs-container { /* Cílíme na kontejner s páry */
-            gap: 0.5rem; /* Zmenšena mezera mezi páry */
-            display: flex; /* Abychom je mohli efektivně uspořádat */
+        .draggable-column, .dropzone-column {
+            display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%;
+            gap: 0.5rem; /* Mezera mezi prvky ve sloupci */
         }
 
         /* Zvětšení textu nadpisů a tlačítek */
@@ -153,138 +173,4 @@
             border-color: #dc3545; /* Červený okraj */
         }
     </style>
-    <script>
-        // Konfigurace MathJax
-        MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']] // Definuje $...$ pro inline rovnice
-            },
-            svg: {
-                fontCache: 'global'
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-</head>
-<body class="bg-gradient-to-br from-blue-100 to-purple-100 h-full">
-    <div class="bg-white rounded-xl shadow-2xl main-quiz-container">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Zahradník Bedřich osází záhon za 6 dní, Tonda za 10 dní, Kamila za 8 dní. Přesuňte věty na jejich správné matematické vyjádření.</h1>
-
-        <div id="quiz-pairs-container" class="flex flex-col gap-2">
-            <div class="quiz-pair">
-                <div id="item-orange"
-                     class="draggable bg-orange-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
-                     draggable="true"
-                     data-correct-target="target-orange-basket"
-                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>'>
-                    <p class="text-center">
-                        $$ 2\cdot\left({{\frac16}}+\frac{1}{10}\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$
-                    </p>
-                </div>
-                <div id="target-orange-basket"
-                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
-                     data-accepts="item-orange"
-                     data-original-html='<span class="mb-1 text-center">Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>'>
-                    <span class="mb-1 text-center">Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
-                </div>
-            </div>
-
-            <div class="quiz-pair">
-                <div id="item-red"
-                     class="draggable bg-red-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
-                     draggable="true"
-                     data-correct-target="target-red-basket"
-                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$</p>'>
-                    <p class="text-center">
-                        $$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$
-                    </p>
-                </div>
-                <div id="target-red-basket"
-                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
-                     data-accepts="item-red"
-                     data-original-html='<span class="mb-1 text-center">Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>'>
-                    <span class="mb-1 text-center">Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
-                </div>
-            </div>
-
-            <div class="quiz-pair">
-                <div id="item-yellow"
-                     class="draggable bg-yellow-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
-                     draggable="true"
-                     data-correct-target="target-yellow-basket"
-                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=\frac78 $$</p>'>
-                    <p class="text-center">
-                        $$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=\frac78 $$
-                    </p>
-                </div>
-                <div id="target-yellow-basket"
-                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
-                     data-accepts="item-yellow"
-                     data-original-html='<span class="mb-1 text-center">Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>'>
-                    <span class="mb-1 text-center">Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
-                </div>
-            </div>
-
-            <div class="quiz-pair">
-                <div id="item-green"
-                     class="draggable bg-green-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
-                     draggable="true"
-                     data-correct-target="target-green-basket"
-                     data-original-html='<p class="text-center">$$ 2\cdot\left({{\frac16}}+\frac{1}{x}+\frac18+\frac{1}{10}\right)=1 $$</p>'>
-                    <p class="text-center">
-                        $$ 2\cdot\left({{\frac16}}+\frac{1}{x}+\frac18+\frac{1}{10}\right)=1 $$
-                    </p>
-                </div>
-                <div id="target-green-basket"
-                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
-                     data-accepts="item-green"
-                     data-original-html='<span class="mb-1 text-center">Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.</span>'>
-                    <span class="mb-1 text-center">Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.</span>
-                </div>
-            </div>
-
-            <div class="quiz-pair">
-                <div id="item-blue"
-                     class="draggable bg-blue-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
-                     draggable="true"
-                     data-correct-target="target-blue-basket"
-                     data-original-html='<p class="text-center">$$ {\frac{1}{6}} + {\frac{1}{10}} + {\frac{1}{8}} = {\frac{x}{1}} $$</p>'>
-                    <p class="text-center">
-                        $$ {\frac{1}{6}} + {\frac{1}{10}} + {\frac{1}{8}} = {\frac{x}{1}} $$
-                    </p>
-                </div>
-                <div id="target-blue-basket"
-                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
-                     data-accepts="item-blue"
-                     data-original-html='<span class="mb-1 text-center">Jak dlouho by trvalo osázení záhonu, kdyby všichni pracovali společně?</span>'>
-                    <span class="mb-1 text-center">Jak dlouho by trvalo osázení záhonu, kdyby všichni pracovali společně?</span>
-                </div>
-            </div>
-
-            <div class="quiz-pair">
-                <div id="item-purple"
-                     class="draggable bg-purple-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
-                     draggable="true"
-                     data-correct-target="target-purple-basket"
-                     data-original-html='<p class="text-center">$$ {\frac{x}{6}} + {\frac{x}{10}} + {\frac{x}{8}} = 1 $$</p>'>
-                    <p class="text-center">
-                        $$ {\frac{x}{6}} + {\frac{x}{10}} + {\frac{x}{8}} = 1 $$
-                    </p>
-                </div>
-                <div id="target-purple-basket"
-                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
-                     data-accepts="item-purple"
-                     data-original-html='<span class="mb-1 text-center">Všichni osazovali záhon společně po dobu X dní. Jak dlouho trvala práce?</span>'>
-                    <span class="mb-1 text-center">Všichni osazovali záhon společně po dobu X dní. Jak dlouho trvala práce?</span>
-                </div>
-            </div>
-        </div>
-
-        <div id="message-box" class="mt-4 p-2 rounded-lg hidden message-box w-full max-w-md">
-        </div>
-
-        <button id="check-button" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-colors">
-            Zkontrolovat
-        </button>
-
-        <button id="reset-button" class="mt-4 px-4 py-2 bg-
+    <script
