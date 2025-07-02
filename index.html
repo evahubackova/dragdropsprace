@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="cs" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop Kvíz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Základní styly pro drag-and-drop */
+        .draggable {
+            cursor: grab;
+            transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+            touch-action: none; /* Zabraňuje výchozímu chování prohlížeče při dotyku */
+            width: 24rem; /* Mírně zmenšena šířka draggable boxů */
+            min-height: 4rem; /* Mírně zmenšena minimální výška draggable boxů */
+            padding: 0.5rem; /* Zmenšen padding */
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .dropzone {
+            border: 2px dashed #cbd5e0; /* border-gray-300 */
+            background-color: #f8fafc; /* bg-gray-50 */
+            transition: background-color 0.3s ease;
+            min-height: 5rem; /* Mírně zmenšena minimální výška dropzóny */
+            width: 28rem; /* Mírně zmenšena šířka dropzóny */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.5rem; /* Zmenšen padding */
+        }
+
+        .dropzone.hovered {
+            background-color: #e2e8f0; /* bg-gray-200 */
+        }
+
+        /* Styly pro přetažený prvek uvnitř zóny */
+        .dropped-item {
+            cursor: default !important;
+            opacity: 1 !important;
+            transform: none !important;
+            width: 100%;
+        }
+
+        /* Důležité: Styly pro MathJax rovnice */
+        .mjx-chtml {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 1.25rem !important; /* Dále zmenšena velikost písma rovnic */
+        }
+
+        /* Optimalizace pro menší obrazovky a Genially */
+        body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            overflow: hidden; /* Zabrání scrollování celého body */
+        }
+
+        /* Nové styly pro hlavní kontejner pro Genially */
+        .main-quiz-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem; /* Zmenšen padding hlavního kontejneru */
+            box-sizing: border-box;
+        }
+
+        /* Kontejnery pro draggable a dropzone prvky */
+        .quiz-pair {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem; /* Mírně zmenšena mezera mezi draggable a dropzone v páru */
+            margin-bottom: 0.3rem; /* Zmenšena mezera mezi jednotlivými páry */
+            width: 100%;
+        }
+
+        /* Zmenšení obecných mezer */
+        .flex.flex-col.gap-2 { /* Cílíme na kontejner s páry */
+            gap: 0.5rem; /* Zmenšena mezera mezi páry */
+        }
+
+        /* Zvětšení textu nadpisů a tlačítek */
+        h1 {
+            font-size: 2.2rem; /* Mírně zmenšeno pro nadpis */
+            margin-bottom: 0.4rem; /* Zmenšeno pro odstup */
+        }
+
+        .message-box {
+            font-size: 1.1rem; /* Mírně zmenšeno pro zprávy */
+            padding: 0.6rem 1rem; /* Zmenšeno pro lepší vzhled */
+            margin-top: 0.4rem; /* Zmenšeno pro odstup */
+        }
+
+        .reset-button {
+            padding: 0.6rem 1.2rem; /* Zmenšeno pro tlačítko */
+            font-size: 1.1rem; /* Mírně zmenšeno pro tlačítko */
+            margin-top: 0.4rem; /* Zmenšeno pro odstup */
+        }
+
+        /* Písmo uvnitř dropzón */
+        .dropzone span {
+            font-size: 1.1rem; /* Dále zmenšeno pro text v dropzónách */
+            line-height: 1.3;
+        }
+
+        /* Písmo uvnitř draggable boxů (pro MathJax rovnice) */
+        .draggable p {
+            font-size: 1.2rem; /* Dále zmenšeno pro rovnice */
+            line-height: 1.3;
+        }
+
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']] // Definuje $...$ pro inline rovnice
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 h-full">
+    <div class="bg-white rounded-xl shadow-2xl main-quiz-container">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Zahradník Bedřich osází záhon za 6 dní, Tonda za 10 dní, Kamila za 8 dní. Přesuňte věty na jejich správné matematické vyjádření.</h1>
+
+        <div class="flex flex-col gap-2">
+            <div class="quiz-pair">
+                <div id="item-orange"
+                     class="draggable bg-orange-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-orange-basket">
+                    <p class="text-center">
+                        $$ 2\cdot\left({{\frac16}}+\frac{1}{10}\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$
+                    </p>
+                </div>
+                <div id="target-orange-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-orange">
+                    <span class="mb-1 text-center">Záhon začali osazovat Bedřich s Tondou, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-red"
+                     class="draggable bg-red-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-red-basket">
+                    <p class="text-center">
+                       $$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=1 $$
+                    </p>
+                </div>
+                <div id="target-red-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-red">
+                    <span class="mb-1 text-center">Záhon začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-yellow"
+                     class="draggable bg-yellow-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-yellow-basket">
+                    <p class="text-center">
+                       $$ 2\cdot\left({{\frac16}}+\frac{1}{10}+\frac18\right)+x\cdot\left({{\frac18}}+\frac{1}{10}\right)=\frac78 $$
+                    </p>
+                </div>
+                <div id="target-yellow-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-yellow">
+                    <span class="mb-1 text-center">Záhon byl osázen z jedné osminy, zbytek záhonu začali osazovat všichni společně, po dvou hodinách Bedřich odešel a zbytek záhonu dosázel Tonda s Kamilou.</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-green"
+                     class="draggable bg-green-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-green-basket">
+                    <p class="text-center">
+                       $$ 2\cdot\left({{\frac16}}+\frac{1}{x}+\frac18+\frac{1}{10}\right)=1 $$
+                    </p>
+                </div>
+                <div id="target-green-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-green">
+                    <span class="mb-1 text-center">Do party se přidal Karel a s ním, kdyby všichni pracovali od začátku společně, by byl záhon osázen za 2 hodiny.</span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-blue"
+                     class="draggable bg-blue-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-blue-basket">
+                    <p class="text-center">
+                       
+                    </p>
+                </div>
+                <div id="target-blue-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-blue">
+                    <span class="mb-1 text-center"></span>
+                </div>
+            </div>
+
+            <div class="quiz-pair">
+                <div id="item-purple"
+                     class="draggable bg-purple-500 text-white p-1 rounded-lg shadow-md font-semibold transform hover:scale-105 flex items-center justify-center"
+                     draggable="true"
+                     data-correct-target="target-purple-basket">
+                    <p class="text-center">
+                        
+                    </p>
+                </div>
+                <div id="target-purple-basket"
+                     class="dropzone p-2 rounded-lg flex flex-col items-center justify-center text-gray-500 font-medium"
+                     data-accepts="item-purple">
+                    <span class="mb-1 text-center"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="message-box" class="mt-4 p-2 rounded-lg hidden message-box">
+        </div>
+
+        <button id="reset-button" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg shadow-md hover:bg-gray-300 transition-colors hidden reset-button">
+            Resetovat kvíz
+        </button>
+    </div>
+
+    <script>
+        const draggableItems = document.querySelectorAll('.draggable');
+        const
